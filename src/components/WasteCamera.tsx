@@ -1,8 +1,10 @@
 import { useState, useRef } from 'react';
-import { Camera, Upload, ArrowLeft, Loader2 } from 'lucide-react';
+import { Camera, Upload, ArrowLeft, Loader2, Smartphone } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { WasteAnalysis, WASTE_CLASSIFICATIONS } from '@/types/waste';
+import { Camera as CapacitorCamera, CameraResultType, CameraSource } from '@capacitor/camera';
+import { Capacitor } from '@capacitor/core';
 
 interface WasteCameraProps {
   onAnalysisComplete: (analysis: WasteAnalysis) => void;
@@ -71,7 +73,27 @@ const WasteCamera = ({ onAnalysisComplete, onBack }: WasteCameraProps) => {
     }
   };
 
-  const startCamera = async () => {
+  const startNativeCamera = async () => {
+    try {
+      const image = await CapacitorCamera.getPhoto({
+        quality: 90,
+        allowEditing: false,
+        resultType: CameraResultType.DataUrl,
+        source: CameraSource.Camera,
+        correctOrientation: true
+      });
+
+      if (image.dataUrl) {
+        handleImageCapture(image.dataUrl);
+      }
+    } catch (error) {
+      console.error('Native camera error:', error);
+      // Fallback to web camera or file upload
+      startWebCamera();
+    }
+  };
+
+  const startWebCamera = async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ 
         video: { facingMode: 'environment' } 
@@ -103,6 +125,15 @@ const WasteCamera = ({ onAnalysisComplete, onBack }: WasteCameraProps) => {
       console.error('Camera access error:', error);
       // Fallback to file upload
       fileInputRef.current?.click();
+    }
+  };
+
+  const startCamera = () => {
+    // Use native camera if running on mobile device, web camera otherwise
+    if (Capacitor.isNativePlatform()) {
+      startNativeCamera();
+    } else {
+      startWebCamera();
     }
   };
 
@@ -158,8 +189,12 @@ const WasteCamera = ({ onAnalysisComplete, onBack }: WasteCameraProps) => {
                   className="w-full"
                   onClick={startCamera}
                 >
-                  <Camera className="h-5 w-5 mr-2" />
-                  Take Photo
+                  {Capacitor.isNativePlatform() ? (
+                    <Smartphone className="h-5 w-5 mr-2" />
+                  ) : (
+                    <Camera className="h-5 w-5 mr-2" />
+                  )}
+                  {Capacitor.isNativePlatform() ? 'Open Native Camera' : 'Take Photo'}
                 </Button>
                 
                 <div className="relative">

@@ -1,10 +1,12 @@
 import { useState } from 'react';
-import { Camera, Upload, Zap, AlertTriangle, Recycle } from 'lucide-react';
+import { Camera, Upload, Zap, AlertTriangle, Recycle, Wifi } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import WasteCamera from '@/components/WasteCamera';
 import WasteResults from '@/components/WasteResults';
+import SensorIntegration from '@/components/SensorIntegration';
 import { WasteAnalysis } from '@/types/waste';
 
 const Index = () => {
@@ -97,29 +99,47 @@ const Index = () => {
           </Card>
         </div>
 
-        {/* Main Action */}
-        <div className="text-center">
-          <Card className="max-w-md mx-auto">
-            <CardHeader>
-              <CardTitle className="flex items-center justify-center">
-                <Camera className="h-6 w-6 mr-2" />
-                Analyze Your Waste
-              </CardTitle>
-              <CardDescription>
-                Take a photo or upload an image to identify waste materials
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <Button 
-                size="lg" 
-                className="w-full"
-                onClick={() => setShowCamera(true)}
-              >
-                <Camera className="h-5 w-5 mr-2" />
-                Start Camera Analysis
-              </Button>
-            </CardContent>
-          </Card>
+        {/* Main Features */}
+        <div className="max-w-4xl mx-auto">
+          <Tabs defaultValue="camera" className="w-full">
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="camera">Camera Analysis</TabsTrigger>
+              <TabsTrigger value="sensors">Hardware Sensors</TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="camera" className="mt-6">
+              <Card className="max-w-md mx-auto">
+                <CardHeader>
+                  <CardTitle className="flex items-center justify-center">
+                    <Camera className="h-6 w-6 mr-2" />
+                    Analyze Your Waste
+                  </CardTitle>
+                  <CardDescription>
+                    Take a photo or upload an image to identify waste materials
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <Button 
+                    size="lg" 
+                    className="w-full"
+                    onClick={() => setShowCamera(true)}
+                  >
+                    <Camera className="h-5 w-5 mr-2" />
+                    Start Camera Analysis
+                  </Button>
+                </CardContent>
+              </Card>
+            </TabsContent>
+            
+            <TabsContent value="sensors" className="mt-6">
+              <SensorIntegration 
+                onSensorData={(data) => {
+                  console.log('Sensor data received:', data);
+                  // You can add logic here to integrate sensor data with waste analysis
+                }}
+              />
+            </TabsContent>
+          </Tabs>
         </div>
 
         {/* Project Info */}
